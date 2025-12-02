@@ -1,42 +1,34 @@
 import { readFileSync } from "fs";
 
 const ranges = readFileSync("data/2.txt", "utf8").split(",").map((r) => {
-  const parts = r.split("-");
-  return {l: +parts[0], h: +parts[1]};
+    const parts = r.split("-");
+    return { l: +parts[0], h: +parts[1] };
 })
 
-const findInvalids = (pair: {l: number, h: number}) => {
-    let invalids: Array<number> = [];
-    for (let ii=pair.l; ii<=pair.h; ii++) {
+const findInvalidIds = (pair: { l: number, h: number }, isInvalid: (str: string) => boolean) => {
+    let invalidIds: Array<number> = [];
+    for (let ii = pair.l; ii <= pair.h; ii++) {
         const str = ii.toString();
-        if (str.length % 2 == 0) {
-            if (str.slice(0, str.length/2) === str.slice(str.length/2)) {
-                invalids.push(ii);
-            }
+        if (isInvalid(str)) {
+            invalidIds.push(ii);
         }
     }
-    return invalids;
+    return invalidIds;
 }
 
-const findInvalids2 = (pair: {l: number, h: number}) => {
-    let invalids: Array<number> = [];
-    for (let ii=pair.l; ii<=pair.h; ii++) {
-        const str = ii.toString();
-        for (let jj=1; jj<=str.length/2; jj++) {
-            const pattern = str.slice(0, jj);
-            let repeatPattern = "";
-            while (repeatPattern.length < str.length) {
-                repeatPattern += pattern;
-            }
-            if (repeatPattern == str) {
-                invalids.push(ii);
-                break;
+console.log("Part1: ", ranges.flatMap((pair: { l: number, h: number }) => {
+    return findInvalidIds(pair, (str: string) =>
+        str.length % 2 == 0 && str.slice(0, str.length / 2) === str.slice(str.length / 2)
+    );
+}).reduce((a, b) => a + b, 0));
+
+console.log("Part2: ", ranges.flatMap((pair: { l: number, h: number }) => {
+    return findInvalidIds(pair, (str: string) => {
+        for (let jj = 1; jj <= str.length / 2; jj++) {
+            if (str.slice(0, jj).repeat(str.length / jj) == str) {
+                return true;
             }
         }
-    }
-    return invalids;
-}
-
-
-console.log("Part1: ", ranges.flatMap(findInvalids).reduce((a, b) => a + b, 0));
-console.log("Part2: ", ranges.flatMap(findInvalids2).reduce((a, b) => a + b, 0));
+        return false;
+    });
+}).reduce((a, b) => a + b, 0));

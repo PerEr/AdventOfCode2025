@@ -12,3 +12,22 @@ const findMax = (str: string) => {
 }
 
 console.log('Part1:', batteries.map(findMax).reduce((a,v) => a+v, 0));
+
+const cache = new Map<string, number>();
+const findMaxMemoized = (str: string, n: number): number => {
+  if (n === 0 || str.length < n) {
+    return 0;
+  }
+  const key = `${str}-${n}`;
+  if (cache.has(key)) {
+    return cache.get(key)!;
+  }
+  const rest = str.slice(1)
+  const pickFirst = (+str[0]) * (10 ** (n - 1)) + findMaxMemoized(rest, n - 1);
+  const skipFirst = findMaxMemoized(rest, n);
+  const result = Math.max(pickFirst, skipFirst);
+  cache.set(key, result);
+  return result;
+}
+
+console.log('Part2:', batteries.map((l) => findMaxMemoized(l, 12)).reduce((a,v) => a+v, 0));

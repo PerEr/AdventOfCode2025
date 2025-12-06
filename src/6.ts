@@ -11,47 +11,42 @@ const metaAcc1 = operators!.map((op) =>
         { acc: 1, fn: (a: number, b: number) => a * b }
 );
 
-const result = values.reduce((macc, row) => {
+console.log("Part1:", values.reduce((macc, row) => {
     row.forEach((value, idx) => {
         macc[idx].acc = macc[idx].fn(macc[idx].acc, value);
     });
     return macc;
-}, metaAcc1);
+}, metaAcc1).reduce((acc, { acc: val }) => acc + val, 0));
 
-console.log("Part1:", result.reduce((acc, { acc: val }) => acc + val, 0));
+const splitAtColumns_ = (line: string, columns: number[]): string[] => {
+    const effectiveColumns = columns.filter(col => 0 <= col && col <= line.length);
+    const { parts, start } = effectiveColumns.reduce(
+        ({ start, parts }, col) => ({ start: col, parts: [...parts, line.slice(start + 1, col)] }),
+        { start: -1, parts: [] as string[] }
+    );
+    return start < line.length ? [...parts, line.slice(start + 1)] : parts;
+};
 
-const blankColumns = (data: string[]): number[] =>
-    Array.from(
-        { length: Math.max(0, ...data.map(l => l.length)) },
-        (_, col) => col
-    ).filter(col => data.every(line => !line[col] || line[col] === ' '));
+const splitAtColumns = (line: string, columns: number[]): string[] =>
+    columns
+        .reduce((parts, col, idx) => {
+            const start = idx === 0 ? 0 : columns[idx - 1] + 1;
+            return [...parts, line.slice(start, col)];
+        }, [] as string[])
+        .concat(line.slice(columns.at(-1)! + 1));
 
-function splitAtColumns(line: string, columns: number[]): string[] {
-    const parts: string[] = [];
-    let start = -1;
+const columnsToSplitAt = Array.from(
+    { length: Math.max(0, ...data.map(l => l.length)) },
+    (_, col) => col
+).filter(col => data.every(line => line[col] === ' '));
 
-    for (const col of columns) {
-        if (col > start && col <= line.length) {
-            parts.push(line.slice(start + 1, col));
-            start = col;
-        }
-    }
-
-    if (start < line.length) {
-        parts.push(line.slice(start + 1));
-    }
-
-    return parts;
-}
-
-const part2 = data
+console.log("Part2:", data
     .slice(0, -1)
-    .map((line) => splitAtColumns(line, blankColumns(data)))
+    .map((line) => splitAtColumns(line, columnsToSplitAt))
     .reduce((acc, line) => {
         line.forEach((part, idx) => {
             for (let i = 0; i < part.length; i++) {
-                const c = part.at(i) || "";
-                acc[idx][i] = (acc[idx][i] || "") + c;
+                acc[idx][i] = (acc[idx][i] || "") + part.at(i);
             }
         });
         return acc;
@@ -63,6 +58,4 @@ const part2 = data
             return op === "+" ? a + b : a * b;
         }, op === "+" ? 0 : 1)
     })
-    .reduce((a, b) => a + b, 0);
-
-console.log("Part2:", part2);
+    .reduce((a, b) => a + b, 0));

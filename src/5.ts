@@ -12,15 +12,9 @@ console.log("Part2:", ranges.flatMap(([start, end]) =>
     return b[1] - a[1];
 }).reduce(({ count, depth, prev }, [pos, type]) => {
     if (type === 1) {
-        if (depth === 0) {
-            prev = pos;
-        }
-        depth += 1;
+        if (depth++ === 0) prev = pos;
     } else {
-        depth -= 1;
-        if (depth === 0) {
-            count += (pos - prev + 1);
-        }
+        if (--depth === 0) count += (pos - prev + 1);
     }
     return { count, depth, prev };
 }, { count: 0, depth: 0, prev: 0 }).count);

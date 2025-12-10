@@ -3,8 +3,6 @@ import { readFileSync } from "fs";
 interface Machine {
     lightsMask: number,
     buttonMasks: number[],
-    buttonSeqs: number[][],
-    joltage: number[],
 };
 
 const toMachine = (line: string): Machine => {
@@ -17,17 +15,12 @@ const toMachine = (line: string): Machine => {
     return {
         lightsMask: peelString(parts[0]).split('').reduce((a, v, i) => a + ((v === '#' ? 1 : 0) << i), 0),
         buttonMasks: buttonIndex.map((l) => l.reduce((mask, v) => mask + (1 << v), 0)),
-        buttonSeqs: buttonIndex,
-        joltage: peelString(parts[parts.length - 1]).split(',').map(Number),
     };
 }
 
-const machines = readFileSync("data/10_test.txt", "utf8").split("\n").map(toMachine);
+const machines = readFileSync("data/10.txt", "utf8").split("\n").map(toMachine);
 
 const findMinimumPresses = (machine: Machine): number => {
-    if (machine.lightsMask === 0) return 0;
-    if (machine.buttonMasks.length === 0) return Infinity;
-
     const visited = new Set<number>();
     const allLightsOff = 0;
     const lightsMaskQueue: number[] = [allLightsOff];
@@ -58,6 +51,5 @@ const findMinimumPresses = (machine: Machine): number => {
 
     return Infinity;
 }
-
 
 console.log("Part1:", machines.map(findMinimumPresses).reduce((a, v) => a + v, 0));
